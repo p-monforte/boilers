@@ -262,13 +262,12 @@ bucle_for() {
     show_banner
     echo -e "\n${CYAN}### Barrido de IPs en la red ###${NC}\n"
 
-    # Pedir al usuario que ingrese el tercer número de la IP
-    echo -e "${YELLOW}Ingrese el rango de la IP (1-255):${NC}"
-    read -r octeto
-
-    # Validar que sea un número entre 1 y 255
-    if ! echo "$octeto" | grep -qE '^[1-9][0-9]{0,2}$|^255$'; then
-        echo -e "${RED}Valor inválido. Debe ser un número entre 1 y 255.${NC}"
+    # Obtener el tercer octeto desde brlsn inet
+    octeto=$(ip a show br-lan 2>/dev/null | awk '/inet / {split($2, a, "."); print a[3]; exit}')
+    
+    # Validar que se obtuvo un valor válido
+    if [[ -z "$octeto" || ! "$octeto" =~ ^[1-9][0-9]{0,2}$|^255$ ]]; then
+        echo -e "${RED}No se pudo obtener un rango válido desde brlsn inet.${NC}"
         sleep 2
         return
     fi
@@ -289,13 +288,12 @@ bucle_for_nmap() {
     show_banner
     echo -e "\n${CYAN}### Barrido de IPs en la red ###${NC}\n"
 
-    # Pedir al usuario que ingrese el tercer número de la IP
-    echo -e "${YELLOW}Ingrese el rango de la IP (1-255):${NC}"
-    read -r octeto
-
-    # Validar que sea un número entre 1 y 255
-    if ! echo "$octeto" | grep -qE '^[1-9][0-9]{0,2}$|^255$'; then
-        echo -e "${RED}Valor inválido. Debe ser un número entre 1 y 255.${NC}"
+    # Obtener el tercer octeto desde br-lan inet
+    octeto=$(ip a show br-lan 2>/dev/null | awk '/inet / {split($2, a, "."); print a[3]; exit}')
+    
+    # Validar que se obtuvo un valor válido
+    if [[ -z "$octeto" || ! "$octeto" =~ ^[1-9][0-9]{0,2}$|^255$ ]]; then
+        echo -e "${RED}No se pudo obtener un rango válido desde br-lan inet.${NC}"
         sleep 2
         return
     fi
@@ -316,7 +314,7 @@ bucle_for_nmap() {
         echo -e "\n${CYAN}### Escaneo de puertos con Nmap ###${NC}\n"
         for ip in $active_ips; do
             echo -e "${YELLOW}Escaneando $ip...${NC}"
-            nmap "$ip"
+            nmap -T4 -p 1-1000 --min-rate=1000 --max-retries=1 -n "$ip"
             echo ""
         done
     else
