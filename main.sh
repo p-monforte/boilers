@@ -203,22 +203,23 @@ iptables_info() {
     printf "\n${CYAN}### Reglas de iptables (PREROUTING) ###${NC}\n\n"
 
     # Encabezado con formato
-    printf "${YELLOW}%-7s | %-6s | %-16s | %-16s | %-6s | %-16s${NC}\n" "Target" "Proto" "Source" "Destination" "DPort" "To Address"
-    printf "-------------------------------------------------------------\n"
+    printf "${YELLOW}%-12s | %-6s | %-16s | %-16s | %-6s | %-16s${NC}\n" "Target" "Proto" "Source" "Destination" "DPort" "To Address"
+    printf "-------------------------------------------------------------------------------\n"
 
     # Ejecutar iptables y formatear la salida
     iptables -t nat -L PREROUTING -n -v | awk '
         BEGIN {
-            printf "%-7s | %-6s | %-16s | %-16s | %-6s | %-16s\n", "Target", "Proto", "Source", "Destination", "DPort", "To Address";
-            print "-------------------------------------------------------------";
+            printf "%-12s | %-6s | %-16s | %-16s | %-6s | %-16s\n", "Target", "Proto", "Source", "Destination", "DPort", "To Address";
+            print "-------------------------------------------------------------------------------";
         }
         NR>2 {
-            target = $3;
-            proto = "";
-            source = $8;
-            destination = $9;
-            dport = "";
-            to_address = "";
+            # Inicializamos variables con valores por defecto
+            target = ($3 != "") ? $3 : "-";
+            proto = "-";
+            source = ($8 != "") ? $8 : "-";
+            destination = ($9 != "") ? $9 : "-";
+            dport = "-";
+            to_address = "-";
 
             for (i=1; i<=NF; i++) {
                 if ($i == "tcp" || $i == "udp") proto = $i;
@@ -226,7 +227,10 @@ iptables_info() {
                 if ($i ~ /^to:/) to_address = substr($i, 4);  # Captura la IP y el puerto después de "to:"
             }
 
-            printf "%-7s | %-6s | %-16s | %-16s | %-6s | %-16s\n", target, proto, source, destination, dport, to_address;
+            # Filtrar reglas vacías o que solo sean comentarios
+            if (target != "-" || proto != "-" || dport != "-" || to_address != "-") {
+                printf "%-12s | %-6s | %-16s | %-16s | %-6s | %-16s\n", target, proto, source, destination, dport, to_address;
+            }
         }'
 
     printf "\n${YELLOW}Presione Enter para continuar...${NC}\n"
