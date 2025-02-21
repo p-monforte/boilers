@@ -202,15 +202,11 @@ iptables_info() {
     show_banner
     printf "\n${CYAN}### Reglas de iptables (PREROUTING) ###${NC}\n\n"
 
-    # Encabezado con formato
-    printf "${YELLOW}%-12s | %-6s | %-16s | %-16s | %-6s | %-16s${NC}\n" "Target" "Proto" "Source" "Destination" "DPort" "To Address"
-    printf "-------------------------------------------------------------------------------\n"
-
     # Ejecutar iptables y formatear la salida
     iptables -t nat -L PREROUTING -n -v | awk '
         BEGIN {
-            printf "%-12s | %-6s | %-16s | %-16s | %-6s | %-16s\n", "Target", "Proto", "Source", "Destination", "DPort", "To Address";
-            print "-------------------------------------------------------------------------------";
+            printf "%-22s | %-6s | %-18s | %-18s | %-6s | %-18s\n", "Target", "Proto", "Source", "Destination", "DPort", "To Address";
+            print "------------------------------------------------------------------------------------------------------";
         }
         NR>2 {
             # Inicializamos variables con valores por defecto
@@ -229,7 +225,7 @@ iptables_info() {
 
             # Filtrar reglas vacías o que solo sean comentarios
             if (target != "-" || proto != "-" || dport != "-" || to_address != "-") {
-                printf "%-12s | %-6s | %-16s | %-16s | %-6s | %-16s\n", target, proto, source, destination, dport, to_address;
+                printf "%-22s | %-6s | %-18s | %-18s | %-6s | %-18s\n", target, proto, source, destination, dport, to_address;
             }
         }'
 
@@ -237,6 +233,7 @@ iptables_info() {
     read -r
     clear
 }
+
 
 # Función para obtener la IP de la interfaz br-lan
 br_lan_info() {
