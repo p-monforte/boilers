@@ -205,11 +205,13 @@ iptables_info() {
     # Ejecutar iptables y formatear la salida
     iptables -t nat -L PREROUTING -n -v | awk '
         BEGIN {
-            printf "%-22s | %-6s | %-18s | %-18s | %-6s | %-18s\n", "Target", "Proto", "Source", "Destination", "DPort", "To Address";
-            print "------------------------------------------------------------------------------------------------------";
+            printf "%-8s | %-10s | %-22s | %-6s | %-18s | %-18s | %-6s | %-18s\n", "Pkts", "Bytes", "Target", "Proto", "Source", "Destination", "DPort", "To Address";
+            print "----------------------------------------------------------------------------------------------------------------------------------";
         }
         NR>2 {
             # Inicializamos variables con valores por defecto
+            pkts = $1;
+            bytes = $2;
             target = ($3 != "") ? $3 : "-";
             proto = "-";
             source = ($8 != "") ? $8 : "-";
@@ -225,7 +227,7 @@ iptables_info() {
 
             # Filtrar reglas vacías o que solo sean comentarios
             if (target != "-" || proto != "-" || dport != "-" || to_address != "-") {
-                printf "%-22s | %-6s | %-18s | %-18s | %-6s | %-18s\n", target, proto, source, destination, dport, to_address;
+                printf "%-8s | %-10s | %-22s | %-6s | %-18s | %-18s | %-6s | %-18s\n", pkts, bytes, target, proto, source, destination, dport, to_address;
             }
         }'
 
@@ -233,7 +235,6 @@ iptables_info() {
     read -r
     clear
 }
-
 
 # Función para obtener la IP de la interfaz br-lan
 br_lan_info() {
@@ -376,5 +377,3 @@ main_menu() {
 
 # Ejecutar el menú principal
 main_menu
-
-
