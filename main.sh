@@ -36,6 +36,10 @@ network_info() {
     clear
     show_banner
 
+    # Mostrar la versión del sistema
+    echo -e "\n${CYAN}### Versión del sistema ###${NC}\n"
+    uname -a
+
     # Inicializar variables
     red_movil="No disponible"
     wifi="No disponible"
@@ -43,15 +47,16 @@ network_info() {
     conexion="Desconocida"
 
     # Comprobar conectividad real (UP + IP asignada)
-    if ip a show ppp0 | grep -q "inet "; then
+    if ip a show ppp0 2>/dev/null | grep -q "inet "; then
         red_movil="Disponible"
     fi
 
-    if ip a show wlan0 | grep -q "inet "; then
+    if ip a show wlan0 2>/dev/null | grep -q "inet "; then
         wifi="Disponible"
     fi
 
-    if ip a show eth0 | grep -q "inet "; then
+    # Detectar cualquier interfaz Ethernet con IP asignada (ej: eth0, eth0.1, eth0.2)
+    if ip a | grep -E "eth[0-9]+(\.[0-9]+)?" | grep -q "inet "; then
         ethernet="Disponible"
     fi
 
@@ -80,6 +85,7 @@ network_info() {
     read -r
     clear
 }
+
 # ====================================================================================================
 #                                           MRC
 # ====================================================================================================
