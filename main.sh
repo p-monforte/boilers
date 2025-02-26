@@ -317,7 +317,7 @@ bucle_for_nmap() {
 
     # Escanear con nmap cada IP detectada
     if [ -n "$active_ips" ]; then
-        echo -e "\n${CYAN}### Escaneo de puertos con Nmap ###${NC}\n"
+        echo -e "\n${CYAN}### Escaneo de puertos con Nmap a puertos 0-1000 ###${NC}\n"
         for ip in $active_ips; do
             echo -e "${YELLOW}Escaneando $ip...${NC}"
             nmap -T4 -p 1-1000 --min-rate=1000 --max-retries=1 -n "$ip"
